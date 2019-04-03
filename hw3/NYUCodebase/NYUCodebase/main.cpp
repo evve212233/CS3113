@@ -241,7 +241,7 @@ void DrawSpriteSheet(ShaderProgram &program, int index, int spriteCountX, int sp
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glm::mat4 bettyMatrix = glm::mat4(1.0f);
-	bettyMatrix = glm::scale(bettyMatrix, glm::vec3(0.2f, 0.2f, 0.0f));
+	bettyMatrix = glm::scale(bettyMatrix, glm::vec3(0.2f, 0.25f, 0.0f));
 	program.SetModelMatrix(bettyMatrix);
 	float verCoords[] = { -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f,  -0.5f, -0.5f, 0.5f, -0.5f };
 	glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, verCoords);
@@ -311,7 +311,7 @@ void setup() {
 	glewInit();
 #endif
 	glViewport(0, 0, 640, 360);
-	//for textured girl
+	//for textured girl betty
 	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
 	bettyTex = LoadTexture(RESOURCE_FOLDER"betty_0.png");
 	float spriteWidth = 1.0 / (float)spriteCountX;
@@ -322,11 +322,9 @@ void setup() {
 	heartTex = LoadTexture(RESOURCE_FOLDER"heart.png");
 	glUseProgram(program.programID);
 
-
-
 	SheetSprite girl = SheetSprite(bettyTex, 0.0f, 0.0f, 0.25f, 0.25f, 0.30f);
 	SheetSprite enemy = SheetSprite(spriteTex, 0.0f, 0.0f, 0.25f, 0.25f, 0.28f);
-	SheetSprite bullet = SheetSprite(heartTex, 0.0f, 0.0f, 1.0f, 1.0f, 0.28f);
+	SheetSprite bullet = SheetSprite(heartTex, 0.0f, 0.0f, 1.0f, 1.0f, 0.25f);
 
 	Entity currPlayer = Entity("player", girl, 0.0f, -0.7f, 3.0f, 0.0f, 1.0f, 1.7f);
 	state.player = currPlayer;
@@ -385,8 +383,6 @@ void processEvents() {
 void updates(float elapsed) {
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	switch (mode) {
-	case STATE_MAIN_MENU:
-		break;
 	case STATE_GAME_LEVEL:
 		if (keys[SDL_SCANCODE_LEFT]) {
 			state.player.velocity.x = -1.5f;
@@ -400,23 +396,23 @@ void updates(float elapsed) {
 		state.player.Update(elapsed);
 		for (Entity &enemy : state.enemies) {
 			if (enemy.position.y < 1000) {
-				if ((enemy.position.x - enemy.sprite.actualSize.x*0.5f) >= -1.77f) {
+				if ((enemy.position.x - enemy.sprite.actualSize.x/2.0f) >= -1.77f) {
 					enemy.velocity.x = 0.2f;
 				}
-				else if ((enemy.position.x + enemy.sprite.actualSize.x*0.5f) <= 1.77f) {
+				else if ((enemy.position.x + enemy.sprite.actualSize.x/2.0f) <= 1.77f) {
 					enemy.velocity.x = -0.2f;
 				}
 				else {
 					enemy.velocity.x = 0.0f;
 				}
 			}
-			if ((enemy.position.x - (enemy.sprite.actualSize.x*0.5f) <= -1.77f)) {
+			if ((enemy.position.x - (enemy.sprite.actualSize.x/2.0f) <= -1.77f)) {
 				for (Entity &enemy : state.enemies) {
 					enemy.position.y -= 0.1f;
 					enemy.position.x += 0.2f;
 				}
 			}
-			else if (enemy.position.x + (enemy.sprite.actualSize.x*0.5f) >= 1.77f) {
+			else if (enemy.position.x + (enemy.sprite.actualSize.x/2.0f) >= 1.77f) {
 				for (Entity &enemy : state.enemies) {
 					enemy.position.y -= 0.1f;
 					enemy.position.x -= 0.2f;
@@ -431,10 +427,7 @@ void updates(float elapsed) {
 					state.score++;
 				}
 			}
-			if (enemy.CollidesWith(state.player)) {
-				mode = STATE_GAME_OVER;
-			}
-			if ((enemy.position.y - 0.5f*enemy.sprite.actualSize.y) <= -1.0f) {
+			if (enemy.CollidesWith(state.player) || (enemy.position.y - 0.5f*enemy.sprite.actualSize.y) <= -1.0f) {
 				mode = STATE_GAME_OVER;
 			}
 		}
@@ -444,14 +437,11 @@ void updates(float elapsed) {
 		}
 		for (Entity &enemy : state.enemies) {
 			enemy.Update(elapsed);
-
 		}
-		if (state.score == 8) {
+		if (state.score == 10) {
 			mode = STATE_GAME_OVER;
 		}
 
-	case STATE_GAME_OVER:
-		break;
 	}
 }
 
@@ -471,7 +461,7 @@ void render() {
 		RenderGameLevel();
 		break;
 	case STATE_GAME_OVER:
-		if (state.score == 8) {
+		if (state.score == 10) {
 			string msgP = "Congrats, You are loved by all on this planet!";
 			DrawText(program, fontTex, msgP, -1.658f, 0.0f, 0.09f, 0.001f);
 		}
