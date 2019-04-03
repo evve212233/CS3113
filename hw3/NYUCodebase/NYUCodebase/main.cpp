@@ -114,6 +114,8 @@ public:
 /*--------------------------Entity class functions----------------------------------*/
 void Entity::Draw(ShaderProgram &program) {
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	modelMatrix = glm::translate(modelMatrix, glm::vec3(position.x, position.y, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.8f, 1.0f, 1.0f));
 	program.SetModelMatrix(modelMatrix);
@@ -143,7 +145,6 @@ bool Entity::CollidesWith(Entity &entity) {
 // bullet global
 int bulletInd = 0;
 const int maxBullets = 30;
-float bTimer = 0.1f;
 
 struct GameState {
 	Entity player;
@@ -344,7 +345,6 @@ void setup() {
 }
 
 void processEvents() {
-	while (SDL_PollEvent(&event)) {
 		switch (mode) {
 		case STATE_MAIN_MENU:
 			while (SDL_PollEvent(&event)) {
@@ -352,7 +352,7 @@ void processEvents() {
 					done = true;
 				}
 				else if (event.type == SDL_MOUSEBUTTONDOWN) {
-						mode = STATE_GAME_LEVEL;
+					mode = STATE_GAME_LEVEL;
 				}
 			}
 			break;
@@ -361,7 +361,7 @@ void processEvents() {
 				if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 					done = true;
 				}
-				else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && bTimer >= 0.1) {
+				else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
 					state.bullets[bulletInd].position.x = state.player.position.x;
 					state.bullets[bulletInd].position.y = state.player.position.y;
 					state.bullets[bulletInd].velocity.y = 3.0f;
@@ -369,7 +369,6 @@ void processEvents() {
 					if (bulletInd >= maxBullets) {
 						bulletInd = 0;
 					}
-					bTimer = 0;
 				}
 				break;
 		case STATE_GAME_OVER:
@@ -381,12 +380,10 @@ void processEvents() {
 			break;
 			}
 		}
-	}
 }
 
 void updates(float elapsed) {
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
-
 	switch (mode) {
 	case STATE_MAIN_MENU:
 		break;
@@ -404,10 +401,10 @@ void updates(float elapsed) {
 		for (Entity &enemy : state.enemies) {
 			if (enemy.position.y < 1000) {
 				if ((enemy.position.x - enemy.sprite.actualSize.x*0.5f) >= -1.77f) {
-					enemy.velocity.x = 0.1f;
+					enemy.velocity.x = 0.2f;
 				}
 				else if ((enemy.position.x + enemy.sprite.actualSize.x*0.5f) <= 1.77f) {
-					enemy.velocity.x = -0.1f;
+					enemy.velocity.x = -0.2f;
 				}
 				else {
 					enemy.velocity.x = 0.0f;
@@ -415,13 +412,13 @@ void updates(float elapsed) {
 			}
 			if ((enemy.position.x - (enemy.sprite.actualSize.x*0.5f) <= -1.77f)) {
 				for (Entity &enemy : state.enemies) {
-					enemy.position.y -= 0.08f;
+					enemy.position.y -= 0.1f;
 					enemy.position.x += 0.2f;
 				}
 			}
 			else if (enemy.position.x + (enemy.sprite.actualSize.x*0.5f) >= 1.77f) {
 				for (Entity &enemy : state.enemies) {
-					enemy.position.y -= 0.08f;
+					enemy.position.y -= 0.1f;
 					enemy.position.x -= 0.2f;
 				}
 			}
@@ -449,8 +446,7 @@ void updates(float elapsed) {
 			enemy.Update(elapsed);
 
 		}
-		bTimer += elapsed;
-		if (state.score == 3) {
+		if (state.score == 7) {
 			mode = STATE_GAME_OVER;
 		}
 
@@ -475,7 +471,7 @@ void render() {
 		RenderGameLevel();
 		break;
 	case STATE_GAME_OVER:
-		if (state.score == 3) {
+		if (state.score == 7) {
 			string msgP = "Congrats, You are loved by all on this planet now!";
 			DrawText(program, fontTex, msgP, -1.45f, 0.0f, 0.1f, 0.005f);
 		}
