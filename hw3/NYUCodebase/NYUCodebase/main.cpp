@@ -446,7 +446,7 @@ void updates(float elapsed) {
 			enemy.Update(elapsed);
 
 		}
-		if (state.score == 7) {
+		if (state.score == 8) {
 			mode = STATE_GAME_OVER;
 		}
 
@@ -471,13 +471,13 @@ void render() {
 		RenderGameLevel();
 		break;
 	case STATE_GAME_OVER:
-		if (state.score == 7) {
-			string msgP = "Congrats, You are loved by all on this planet now!";
-			DrawText(program, fontTex, msgP, -1.45f, 0.0f, 0.1f, 0.005f);
+		if (state.score == 8) {
+			string msgP = "Congrats, You are loved by all on this planet!";
+			DrawText(program, fontTex, msgP, -1.658f, 0.0f, 0.09f, 0.001f);
 		}
 		else {
 			string msgF = "Not good. Please don't trust others so quickly!";
-			DrawText(program, fontTex, msgF, -1.45f, 0.0f, 0.1f, 0.005f);
+			DrawText(program, fontTex, msgF, -1.66f, 0.0f, 0.09f, 0.001f);
 		}
 		break;
 	}
