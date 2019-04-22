@@ -377,13 +377,13 @@ void RenderMainMenu() {
 /*-------------------------------game over menu-----------------------------------*/
 void RenderGameOver() {
 	if (win) {
-		string text = "Conngrats! You found the star";
+		string text = "Conngrats!You are the Brighest Star!";
 		DrawText(program, fontTex, text, -1.3f, 0.6f, 0.15f, 0.003f);
 	}
 	else {
-		string text = "It's ok, try again!";
+		string text = "Failure Is Necessary In Life!";
 		DrawText(program, fontTex, text, -1.3f, 0.6f, 0.15f, 0.003f);
-		string text2 = "star is waiting for you!";
+		string text2 = "But Never Give Up!";
 		DrawText(program, fontTex, text2, -1.0f, -0.3f, 0.1f, 0.003f);
 	}
 }
@@ -515,7 +515,6 @@ void Update(float elapsed) {
 		if (betty.win) {
 			cout << "congrats!";
 			goal.size += 1;
-
 			win = true;
 			mode = STATE_GAME_OVER;
 		}
