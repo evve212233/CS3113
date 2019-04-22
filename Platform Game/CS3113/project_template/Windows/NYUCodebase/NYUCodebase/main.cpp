@@ -366,25 +366,25 @@ void DrawText(ShaderProgram &program, int fontTexture, string text, float row, f
 /*-------------------------------Render Main Menu------------------------------------*/
 void RenderMainMenu() {
 	string text = "Super Betty: Find Star";
-	DrawText(program, fontTex, text, -1.3f, 0.6f, 0.15f, 0.003f);
+	DrawText(program, fontTex, text, 2.5f, 0.0f, 0.15f, 0.003f);
 	string text2 = "Press: SPACE to jump";
 	string text3 = "LEFT/RIGHT to move";
 	string text4 = "Click anywhere to start the game";
-	DrawText(program, fontTex, text2, -1.0f, -0.3f, 0.1f, 0.003f);
-	DrawText(program, fontTex, text3, -0.42f, -0.5f, 0.1f, 0.003f);
-	DrawText(program, fontTex, text4, -1.02f, -0.8f, 0.08f, 0.003f);
+	DrawText(program, fontTex, text2, 2.8f, -0.3f, 0.1f, 0.003f);
+	DrawText(program, fontTex, text3, 2.85f, -0.5f, 0.1f, 0.003f);
+	DrawText(program, fontTex, text4, 2.8f, -0.8f, 0.08f, 0.003f);
 }
 /*-------------------------------game over menu-----------------------------------*/
 void RenderGameOver() {
 	if (win) {
 		string text = "Conngrats!You are the Brighest Star!";
-		DrawText(program, fontTex, text, -1.3f, 0.6f, 0.15f, 0.003f);
+		DrawText(program, fontTex, text, 2.5f, 0.0f, 0.15f, 0.003f);
 	}
 	else {
-		string text = "Failure Is Necessary In Life!";
-		DrawText(program, fontTex, text, -1.3f, 0.6f, 0.15f, 0.003f);
-		string text2 = "But Never Give Up!";
-		DrawText(program, fontTex, text2, -1.0f, -0.3f, 0.1f, 0.003f);
+		string text = "It's ok to fail";
+		DrawText(program, fontTex, text, 2.7f, 0.0f, 0.15f, 0.003f);
+		string text2 = "But NEVER give up!";
+		DrawText(program, fontTex, text2, 2.5f, -0.5f, 0.15f, 0.003f);
 	}
 }
 
@@ -396,6 +396,7 @@ float lerp(float v0, float v1, float t) {
 Entity betty;
 Entity enemy;
 Entity goal;
+glm::vec2 starPos;
 void placeEntity(string type, float placeX, float placeY) {
 	float worldX = placeX * tileSize;
 	float worldY = placeY * -tileSize;
@@ -415,6 +416,8 @@ void placeEntity(string type, float placeX, float placeY) {
 	if (type == "goal") {
 		cout << worldX << " " << worldY << endl;
 		goal = Entity(worldX + 0.088f, worldY + 0.05f, 0.15f, 0.17f, 0.0f, 0.0f, 0.0f, 0.0f);
+		starPos.x = worldX + 0.088f;
+		starPos.y = worldY + 0.05f;
 		goal.entityType = ENTITY_GOAL;
 		entities.push_back(goal);
 	}
@@ -493,8 +496,6 @@ void Update(float elapsed) {
 	switch (mode)
 	{
 	case STATE_MAIN_MENU:
-		viewMatrix = glm::mat4(1.0f);
-		program.SetViewMatrix(viewMatrix);
 		break;
 	case STATE_GAME_LEVEL:
 		betty.acceleration.x = 0.0f;
@@ -514,7 +515,7 @@ void Update(float elapsed) {
 
 		if (betty.win) {
 			cout << "congrats!";
-			goal.size += 1;
+			//goal.size += 1;
 			win = true;
 			mode = STATE_GAME_OVER;
 		}
@@ -552,9 +553,8 @@ void Render() {
 	//for all game elements
 	glClearColor(0.6f, 0.8f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	//draw betty   
-	betty.texture = bettyTexture;
 
+	betty.texture = bettyTexture;
 	enemy.texture = angelTex;
 	goal.texture = starTex;
 	if (mode == STATE_MAIN_MENU) {
@@ -571,7 +571,15 @@ void Render() {
 		renderMap(16, 8);
 	}
 	else if (mode == STATE_GAME_OVER) {
-		RenderGameOver();
+		if (!win) {
+			RenderGameOver();
+		}
+		else {
+			goal.position.x = starPos.x;
+			goal.position.y = starPos.y;
+			goal.size+=0.5f;
+			goal.drawUniform(program, 0, 1, 1);
+		}
 	}
 
 	SDL_GL_SwapWindow(displayWindow);
