@@ -196,7 +196,7 @@ private:
 		int gridY = (int)(position.y / (-tileSize) - size.y / 2);
 		if (gridX < map.mapWidth && abs(gridY) < map.mapHeight) {
 			if (map.mapData[gridY][gridX] != -1) {
-				float penetration = fabs(((-tileSize * gridY) - (position.y + (size.y / 2)*tileSize)));
+				float penetration = fabs(((-tileSize * gridY) - (position.y + (size.y / 2)*tileSize)))/5.0f;
 				position.y -= penetration;
 				velocity.y = 0;
 				collideU = true;
