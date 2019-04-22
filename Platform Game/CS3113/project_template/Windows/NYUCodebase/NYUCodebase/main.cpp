@@ -517,13 +517,13 @@ void Update(float elapsed) {
 			goal.size += 1;
 
 			win = true;
-			GameMode mode = STATE_GAME_OVER;
+			mode = STATE_GAME_OVER;
 		}
 
 		else if (betty.lose) {
 			cout << "It's ok, please try again!";
 			win = false;
-			GameMode mode = STATE_GAME_OVER;
+			mode = STATE_GAME_OVER;
 		}
 		else {
 			betty.update(elapsed);

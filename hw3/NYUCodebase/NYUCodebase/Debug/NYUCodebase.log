@@ -1,11 +1,13 @@
 ﻿  main.cpp
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(238): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(239): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(317): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(318): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(334): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(335): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(339): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(341): warning C4305: '=': truncation from 'double' to 'float'
-c:\users\zzw_e\desktop\cs\cs 3113 intro to game\homework3\cs3113\project_template\windows\nyucodebase\nyucodebase\main.cpp(342): warning C4305: '+=': truncation from 'double' to 'float'
-  NYUCodebase.vcxproj -> C:\Users\zzw_e\Desktop\cs\CS 3113 Intro To Game\Homework3\CS3113\project_template\Windows\NYUCodebase\Debug\NYUCodebase.exe
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(238): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(239): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(317): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(318): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(332): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(333): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(337): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(339): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\zzw_e\documents\github\cs3113\hw3\nyucodebase\nyucodebase\main.cpp(340): warning C4305: '+=': truncation from 'double' to 'float'
+  ShaderProgram.cpp
+  Generating Code...
+  NYUCodebase.vcxproj -> C:\Users\zzw_e\Documents\GitHub\CS3113\hw3\NYUCodebase\Debug\NYUCodebase.exe
