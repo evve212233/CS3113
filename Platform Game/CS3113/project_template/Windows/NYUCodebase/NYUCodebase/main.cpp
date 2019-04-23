@@ -363,30 +363,6 @@ void DrawText(ShaderProgram &program, int fontTexture, string text, float row, f
 	glDisableVertexAttribArray(program.texCoordAttribute);
 }
 
-/*-------------------------------Render Main Menu------------------------------------*/
-void RenderMainMenu() {
-	string text = "Super Betty: Find Star";
-	DrawText(program, fontTex, text, 2.5f, 0.0f, 0.15f, 0.003f);
-	string text2 = "Press: SPACE to jump";
-	string text3 = "LEFT/RIGHT to move";
-	string text4 = "Click anywhere to start the game";
-	DrawText(program, fontTex, text2, 2.8f, -0.3f, 0.1f, 0.003f);
-	DrawText(program, fontTex, text3, 2.85f, -0.5f, 0.1f, 0.003f);
-	DrawText(program, fontTex, text4, 2.8f, -0.8f, 0.08f, 0.003f);
-}
-/*-------------------------------game over menu-----------------------------------*/
-void RenderGameOver() {
-	if (win) {
-		string text = "Conngrats!You are the Brighest Star!";
-		DrawText(program, fontTex, text, 2.5f, 0.0f, 0.15f, 0.003f);
-	}
-	else {
-		string text = "It's ok to fail";
-		DrawText(program, fontTex, text, 2.7f, 0.0f, 0.15f, 0.003f);
-		string text2 = "But NEVER give up!";
-		DrawText(program, fontTex, text2, 2.5f, -0.5f, 0.15f, 0.003f);
-	}
-}
 
 /*-------------------------------Friction--------------------------------------------*/
 float lerp(float v0, float v1, float t) {
@@ -430,6 +406,34 @@ void worldToTileCoordinates(float worldX, float worldY, int *gridX, int *gridY) 
 	*gridY = (int)(worldY / tileSize);
 }
 
+/*-------------------------------Render Main Menu------------------------------------*/
+void RenderMainMenu() {
+	string text = "Super Betty: Finding Star";
+	string text2 = "Press: SPACE to jump";
+	string text3 = "LEFT/RIGHT to move";
+	string text4 = "Click anywhere to start the game";
+	DrawText(program, fontTex, text, 0.0f, 0.0f, 0.1f, 0.003f);
+	DrawText(program, fontTex, text2, 0.0f, 0.0f, 0.1f, 0.003f);
+	DrawText(program, fontTex, text3, 0.0f, 0.0f, 0.1f, 0.003f);
+	DrawText(program, fontTex, text4, 0.0f, 1.8f, 0.08f, 0.003f);
+}
+/*-------------------------------game over menu-----------------------------------*/
+void RenderGameOver() {
+	if (win) {
+		string text = "Congrats!";
+		string text2 = "You are the brighest star!";
+		DrawText(program, fontTex, text, 6.4f, -0.8f, 0.15f, 0.003f);
+		DrawText(program, fontTex, text2, 5.35f, -1.2f, 0.15f, 0.003f);
+	}
+	else {
+		string text = "You are caught!";
+		DrawText(program, fontTex, text, 2.62f, -0.1f, 0.15f, 0.003f);
+		string text2 = "Please try again";
+		DrawText(program, fontTex, text2, 2.58f, -0.9f, 0.15f, 0.003f);
+		enemy.drawUniform(program, 11, 3, 4);
+	}
+}
+
 /*---------------------Functions To be Called in Main()---------------------------*/
 void Setup() {
 	//setup SDL, OpenGL, projection matrix
@@ -443,6 +447,7 @@ void Setup() {
 #endif
 	//setup
 	glViewport(0, 0, 940, 500);
+	glClearColor(0.6f, 0.8f, 1.0f, 0.0f);
 	//for textured polygon
 	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
 	bettyTexture = LoadTexture(RESOURCE_FOLDER"betty.png");
@@ -495,8 +500,6 @@ void Update(float elapsed) {
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	switch (mode)
 	{
-	case STATE_MAIN_MENU:
-		break;
 	case STATE_GAME_LEVEL:
 		betty.acceleration.x = 0.0f;
 		betty.acceleration.y = 0.0f;
@@ -551,12 +554,12 @@ void Update(float elapsed) {
 
 void Render() {
 	//for all game elements
-	glClearColor(0.6f, 0.8f, 1.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	betty.texture = bettyTexture;
 	enemy.texture = angelTex;
 	goal.texture = starTex;
+
 	if (mode == STATE_MAIN_MENU) {
 		RenderMainMenu();
 	}
@@ -579,6 +582,7 @@ void Render() {
 			goal.position.y = starPos.y;
 			goal.size+=0.5f;
 			goal.drawUniform(program, 0, 1, 1);
+			RenderGameOver();
 		}
 	}
 
