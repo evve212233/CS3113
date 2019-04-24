@@ -48,7 +48,6 @@ float friction = 0.8f;
 SDL_Event event;
 bool done = false;
 ShaderProgram program;
-glm::mat4 viewMatrix = glm::mat4(1.0f);
 glm::mat4 projectionMatrix = glm::mat4(1.0f);
 
 //for entity class
@@ -92,8 +91,6 @@ public:
 		//height and width are here
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(size.x, size.y, 1.0f));
 		program.SetModelMatrix(modelMatrix);
-		program.SetProjectionMatrix(projectionMatrix);
-		program.SetViewMatrix(viewMatrix);
 		DrawSpriteSheet(program, texture, index, spriteCountX, spriteCountY);
 	}
 	bool checkEntityCollision(const Entity& e) {
@@ -408,14 +405,16 @@ void worldToTileCoordinates(float worldX, float worldY, int *gridX, int *gridY) 
 
 /*-------------------------------Render Main Menu------------------------------------*/
 void RenderMainMenu() {
-	string text = "Super Betty: Finding Star";
+	glm::mat4 viewMatrix = glm::mat4(1.0f);
+	program.SetViewMatrix(viewMatrix);
+	string text = "Super Betty: Find Star";
 	string text2 = "Press: SPACE to jump";
 	string text3 = "LEFT/RIGHT to move";
 	string text4 = "Click anywhere to start the game";
-	DrawText(program, fontTex, text, 0.0f, 0.0f, 0.1f, 0.003f);
-	DrawText(program, fontTex, text2, 0.0f, 0.0f, 0.1f, 0.003f);
-	DrawText(program, fontTex, text3, 0.0f, 0.0f, 0.1f, 0.003f);
-	DrawText(program, fontTex, text4, 0.0f, 1.8f, 0.08f, 0.003f);
+	DrawText(program, fontTex, text, -1.35f, 0.4f, 0.15f, 0.003f);
+	DrawText(program, fontTex, text2, -0.9f, 0.0f, 0.11f, 0.003f);
+	DrawText(program, fontTex, text3, -0.27f, -0.22f, 0.105f, 0.003f);
+	DrawText(program, fontTex, text4, -1.4f, -0.6f, 0.11f, 0.003f);
 }
 /*-------------------------------game over menu-----------------------------------*/
 void RenderGameOver() {
@@ -458,6 +457,9 @@ void Setup() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	projectionMatrix = glm::ortho(-1.88f, 1.88f, -1.0f, 1.0f, -1.0f, 1.0f);
+	glm::mat4 viewMatrix = glm::mat4(1.0f);
+	program.SetViewMatrix(viewMatrix);
+	program.SetProjectionMatrix(projectionMatrix);
 	glUseProgram(program.programID);
 	map.Load("map.txt");
 	for (FlareMapEntity entity : map.entities){
@@ -500,6 +502,8 @@ void Update(float elapsed) {
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
 	switch (mode)
 	{
+	case STATE_MAIN_MENU:
+		break;
 	case STATE_GAME_LEVEL:
 		betty.acceleration.x = 0.0f;
 		betty.acceleration.y = 0.0f;
@@ -533,7 +537,7 @@ void Update(float elapsed) {
 			betty.acceleration.x = 0.0f;
 		}
 
-		viewMatrix = glm::mat4(1.0f);
+		glm::mat4 viewMatrix = glm::mat4(1.0f);
 		float xMin, yMin;
 		if (betty.position.x < goal.position.x) {
 			xMin = min(-betty.position.x, -1.88f);
