@@ -101,7 +101,7 @@ public:
 
 class ParticleEmitter {
 public:
-	ParticleEmitter(unsigned int particleCount, float maxLifeTime = 1.0f) : gravity(-1.0f), maxLifetime(maxLifeTime)
+	ParticleEmitter(unsigned int particleCount, float maxLifeTime = 1.0f) : gravity(1.0f), maxLifetime(maxLifeTime)
 	{
 		for (int i = 0; i < particleCount; i++) {
 			Particle p(position.x, position.y);
@@ -128,22 +128,23 @@ public:
 				particles[i].position.y = position.y;
 				particles[i].velocity.y = 0.2f;
 				particles[i].velocity.x = 0.2f;
-
+				particles[i].velocity.x *= ((float)rand() / (float)RAND_MAX) * ((i % 2 == 0) ? 1 : -1);
+				particles[i].velocity.y *= ((float)rand() / (float)RAND_MAX);
 			}
 		}
 	}
 	void Render(ShaderProgram& untextured) {
 		glm::mat4 modelMatrix(1.0f);
 		modelMatrix = glm::translate(modelMatrix, glm::vec3(position.x, position.y, 0.0f));
-		program.SetModelMatrix(modelMatrix);
+		untxtprogram.SetModelMatrix(modelMatrix);
 		vector<float> vertices;
 		for (int i = 0; i < particles.size(); i++) {
 			vertices.push_back(particles[i].position.x);
 			vertices.push_back(particles[i].position.y);
 		}
 
-		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices.data());
-		glEnableVertexAttribArray(program.positionAttribute);
+		glVertexAttribPointer(untxtprogram.positionAttribute, 2, GL_FLOAT, false, 0, vertices.data());
+		glEnableVertexAttribArray(untxtprogram.positionAttribute);
 		glDrawArrays(GL_POINTS, 0, particles.size());
 	}
 
@@ -682,14 +683,10 @@ void Update(float elapsed) {
 
 		if (keys[SDL_SCANCODE_RIGHT] && betty.collideR == false) {
 			betty.acceleration.x = 1.0f;
-			//playerInd = bettyRight[i];
-			//i = (i + 1) % 4;
 			rightClick = true;
 		}
 		if (keys[SDL_SCANCODE_LEFT] && betty.collideL == false) {
 			betty.acceleration.x = -1.0f;
-			//playerInd = bettyLeft[i];
-			//i = (i + 1) % 4;
 			leftClick = true;
 		}
 		if (keys[SDL_SCANCODE_SPACE] && betty.collideU == false && betty.collideD) {
@@ -714,14 +711,12 @@ void Update(float elapsed) {
 			betty.update(elapsed);
 			betty.acceleration.x = 0.0f;
 			helper.update(elapsed);
-			helper.acceleration.x = 0.0f;
+			helper.acceleration.x = 0.0;
+			follower.position.x = betty.position.x;
+			follower.position.y = betty.position.y;
+			follower.Update(elapsed);
 		}
 		enemy.update(elapsed);
-		//Particle
-		cout << "\nBetty pos:" << betty.position.x << betty.position.y << endl;
-		cout << "Particle pos:" << follower.position.x << follower.position.y << endl;
-		follower.position.y -= elapsed * 0.5f;
-		follower.Update(elapsed);
 
 		glm::mat4 viewMatrix = glm::mat4(1.0f);
 		float xMin, yMin;
@@ -776,6 +771,9 @@ void Update(float elapsed) {
 		else {
 			betty.update(elapsed);
 			betty.acceleration.x = 0.0f;
+			follower.position.x = betty.position.x;
+			follower.position.y = betty.position.y;
+			follower.Update(elapsed);
 		}
 		enemy.update(elapsed);
 		viewMatrix = glm::mat4(1.0f);
@@ -827,6 +825,9 @@ void Update(float elapsed) {
 		else {
 			betty.update(elapsed);
 			betty.acceleration.x = 0.0f;
+			follower.position.x = betty.position.x;
+			follower.position.y = betty.position.y;
+			follower.Update(elapsed);
 		}
 
 		viewMatrix = glm::mat4(1.0f);
@@ -902,6 +903,7 @@ void Render() {
 
 		enemy.drawUniform(program, runAnimation[currentIndex], 3, 4);
 		goal.drawUniform(program, 0, 1, 1);
+		follower.Render(untxtprogram);
 		renderMap(16, 8);
 	}
 	else if (mode == STATE_GAME_LEVEL3) {
@@ -912,6 +914,7 @@ void Render() {
 
 		enemy.drawUniform(program, runAnimation[currentIndex], 3, 4);
 		goal.drawUniform(program, 0, 1, 1);
+		follower.Render(untxtprogram);
 		renderMap(16, 8);
 	}
 	else if (mode == STATE_GAME_OVER) {
