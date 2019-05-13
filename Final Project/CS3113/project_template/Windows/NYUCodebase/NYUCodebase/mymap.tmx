@@ -9,7 +9,7 @@
  <objectgroup id="2" name="ObjectsLayer">
   <object id="1" type="goal" gid="49" x="608.063" y="96" width="16" height="16"/>
   <object id="3" type="player" gid="99" x="18.9792" y="112.646" width="16" height="16"/>
-  <object id="4" type="enemy" gid="29" x="304.409" y="49" width="16" height="16"/>
+  <object id="4" type="enemy" gid="29" x="320.409" y="45.5" width="16" height="16"/>
   <object id="6" type="player2" gid="100" x="35" y="112" width="16" height="16"/>
  </objectgroup>
 </map>

@@ -33,7 +33,7 @@ location=9,6,1,1
 
 [ObjectsLayer]
 type=enemy
-location=27,9,1,1
+location=18,8,1,1
 
 [ObjectsLayer]
 type=player

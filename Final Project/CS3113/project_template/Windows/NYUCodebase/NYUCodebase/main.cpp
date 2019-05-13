@@ -70,9 +70,13 @@ bool win2 = false;
 bool win3 = false;
 
 //animation
-
+const int runAnimation[] = { 3, 4, 5, 6, 7, 8, 9};
+const int numFrames = 7;
+float animationElapsed = 0.0f;
+float framesPerSecond = 160.0f;
+int currentIndex = 0;
 //betty move index
-int i = 0;
+const int playerFrames = 4;
 const int bettyDown[] = { 0, 4, 8, 12 };
 const int bettyLeft[] = { 1, 5, 9, 13 };
 const int bettyUp[] = { 2, 6, 10, 14 };
@@ -82,7 +86,6 @@ const int hDown[] = { 0, 4, 8, 12 };
 const int hLeft[] = { 1, 5, 9, 13 };
 const int hUp[] = { 2, 6, 10, 14 };
 const int hRight[] = { 3, 7, 11, 15 };
-
 int playerInd=0;
 int enemyInd=1;
 
@@ -331,8 +334,6 @@ GLuint LoadTexture(const char *filePath) {
 	return retTexture;
 }
 
-
-
 /*-----------------Render Map-------------------------------*/
 void renderMap(int sprite_count_x, int sprite_count_y) {
 	glm::mat4 modelMapMatrix = glm::mat4(1.0f);
@@ -523,11 +524,11 @@ void RenderGameOver() {
 	}
 	else {
 		string tex = "You are caught!";
-		DrawText(program, fontTex, tex, 2.62f, -0.1f, 0.15f, 0.003f);
+		DrawText(program, fontTex, tex, 2.43f, 0.0f, 0.20f, 0.003f);
 		string text = "Retry: Press Enter";
-		DrawText(program, fontTex, text, 2.70f, -0.75f, 0.11f, 0.003f);
+		DrawText(program, fontTex, text, 2.65f, -0.8f, 0.11f, 0.003f);
 		string text2 = "Exit:  Press ESC";
-		DrawText(program, fontTex, text2, 2.70f, -0.95f, 0.11f, 0.003f);
+		DrawText(program, fontTex, text2, 2.65f, -1.0f, 0.11f, 0.003f);
 		enemy.drawUniform(program, 11, 3, 4);
 	}
 }
@@ -570,9 +571,7 @@ void Setup() {
 	map.Load("map.txt");
 	map2.Load("map2.txt");
 	map3.Load("map3.txt");
-	for (FlareMapEntity entity : map.entities) {
-		placeEntity(entity.type, entity.x, entity.y);
-	}
+	reset(map);
 	follower.position.x = betty.position.x;
 	follower.position.y = betty.position.y;
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
@@ -633,7 +632,16 @@ void ProcessEvents() {
 	}
 }
 
+//globals for animation character's movement
 int hInd = 0;
+bool rightClick = false;
+bool leftClick = false;
+bool rightClickH = false;
+bool leftClickH = false;
+//global for sound
+Mix_Chunk *someSound;
+
+
 void Update(float elapsed) {
 	//move stuff and check for collisions
 	const Uint8* keys = SDL_GetKeyboardState(NULL);
@@ -650,42 +658,51 @@ void Update(float elapsed) {
 		helper.acceleration.y = 0.0f;
 		helper.canJump = false;
 		
+		rightClick = false;
+		leftClick = false;
+		rightClickH = false;
+		leftClickH = false;
+
 		if (keys[SDL_SCANCODE_D] && helper.collideR == false) {
 			helper.acceleration.x = 1.0f;
-			hInd = hRight[i];
-			i = (i + 1) % 4;
+			rightClickH = true;
 		}
 		if (keys[SDL_SCANCODE_A] && helper.collideL == false) {
 			helper.acceleration.x = -1.0f;
-			hInd = hLeft[i];
-			i = (i + 1) % 4;
+			leftClickH = true;
 		}
 		if (keys[SDL_SCANCODE_W] && helper.collideU == false && helper.collideD) {
 			helper.canJump = true;
 			helper.velocity.y = 1.5f;
 			helper.acceleration.y = 2.0f;
+			someSound = Mix_LoadWAV("sky.wav");
+			Mix_PlayChannel(-1, someSound, 0);
 		}
 
 
 		if (keys[SDL_SCANCODE_RIGHT] && betty.collideR == false) {
 			betty.acceleration.x = 1.0f;
-			playerInd = bettyRight[i];
-			i = (i + 1) % 4;
+			//playerInd = bettyRight[i];
+			//i = (i + 1) % 4;
+			rightClick = true;
 		}
 		if (keys[SDL_SCANCODE_LEFT] && betty.collideL == false) {
 			betty.acceleration.x = -1.0f;
-			playerInd = bettyLeft[i];
-			i = (i + 1) % 4;
+			//playerInd = bettyLeft[i];
+			//i = (i + 1) % 4;
+			leftClick = true;
 		}
 		if (keys[SDL_SCANCODE_SPACE] && betty.collideU == false && betty.collideD) {
 			betty.canJump = true;
 			betty.velocity.y = 1.5f;
 			betty.acceleration.y = 2.0f;
+			someSound = Mix_LoadWAV("sky.wav");
+			Mix_PlayChannel(-1, someSound, 0);
 		}
 
 		if (win1) {
 			cout << "congrats1!" << endl;
-			reset(map2);
+			reset(map);
 			mode = STATE_GAME_LEVEL2;
 		}
 
@@ -699,7 +716,7 @@ void Update(float elapsed) {
 			helper.update(elapsed);
 			helper.acceleration.x = 0.0f;
 		}
-
+		enemy.update(elapsed);
 		//Particle
 		cout << "\nBetty pos:" << betty.position.x << betty.position.y << endl;
 		cout << "Particle pos:" << follower.position.x << follower.position.y << endl;
@@ -731,23 +748,23 @@ void Update(float elapsed) {
 		betty.acceleration.y = 0.0f;
 		if (keys[SDL_SCANCODE_RIGHT] && betty.collideR == false) {
 			betty.acceleration.x = 1.0f;
-			playerInd = bettyRight[i];
-			i = (i + 1) % 4;
+			rightClick = true;
 		}
 		if (keys[SDL_SCANCODE_LEFT] && betty.collideL == false) {
 			betty.acceleration.x = -1.0f;
-			playerInd = bettyLeft[i];
-			i = (i + 1) % 4;
+			leftClick = true;
 		}
 		if (keys[SDL_SCANCODE_SPACE] && betty.collideU == false && betty.collideD) {
 			betty.canJump = true;
 			betty.velocity.y = 1.5f;
 			betty.acceleration.y = 2.0f;
+			someSound = Mix_LoadWAV("sky.wav");
+			Mix_PlayChannel(-1, someSound, 0);
 		}
 
 		if (win2) {
 			cout << "congrats2!" << endl;
-			reset(map3);
+			//reset(map3);
 			mode = STATE_GAME_LEVEL3;
 		}
 
@@ -760,7 +777,7 @@ void Update(float elapsed) {
 			betty.update(elapsed);
 			betty.acceleration.x = 0.0f;
 		}
-
+		enemy.update(elapsed);
 		viewMatrix = glm::mat4(1.0f);
 		if (betty.position.x < goal.position.x) {
 			xMin = min(-betty.position.x, -1.88f);
@@ -783,18 +800,18 @@ void Update(float elapsed) {
 		betty.canJump = false;
 		if (keys[SDL_SCANCODE_RIGHT] && betty.collideR == false) {
 			betty.acceleration.x = 1.0f;
-			playerInd = bettyRight[i];
-			i = (i + 1) % 4;
+			rightClick = true;
 		}
 		if (keys[SDL_SCANCODE_LEFT] && betty.collideL == false) {
 			betty.acceleration.x = -1.0f;
-			playerInd = bettyLeft[i];
-			i = (i + 1) % 4;
+			leftClick = true;
 		}
 		if (keys[SDL_SCANCODE_SPACE] && betty.collideU == false && betty.collideD) {
 			betty.canJump = true;
 			betty.velocity.y = 1.5f;
 			betty.acceleration.y = 2.0f;
+			someSound = Mix_LoadWAV("sky.wav");
+			Mix_PlayChannel(-1, someSound, 0);
 		}
 		if (win3) {
 			cout << "congrats3!" << endl;
@@ -814,12 +831,12 @@ void Update(float elapsed) {
 
 		viewMatrix = glm::mat4(1.0f);
 		if (betty.position.x < goal.position.x) {
-			xMin = min(-betty.position.x, -1.88f);
-			yMin = min(-betty.position.y, 1.0f);
+xMin = min(-betty.position.x, -1.88f);
+yMin = min(-betty.position.y, 1.0f);
 		}
 		else {
-			xMin = min(-betty.position.x, -goal.position.x);
-			yMin = min(-betty.position.y, 1.0f);
+		xMin = min(-betty.position.x, -goal.position.x);
+		yMin = min(-betty.position.y, 1.0f);
 		}
 		viewMatrix = glm::translate(viewMatrix, glm::vec3(xMin, yMin, 0.0f));
 		program.SetViewMatrix(viewMatrix);
@@ -837,6 +854,7 @@ void reset(const FlareMap &m) {
 		placeEntity(entity.type, entity.x, entity.y);
 	}
 }
+
 void Render() {
 	//for all game elements
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -852,10 +870,27 @@ void Render() {
 	else if (mode == STATE_GAME_LEVEL1) {
 		int bcountX = 4;
 		int bcountY = 4;
-		betty.drawUniform(program, playerInd, bcountX, bcountY);
-		helper.drawUniform(program, hInd, bcountX, bcountY);
+		if (rightClick) {
+			betty.drawUniform(program, bettyRight[playerInd], bcountX, bcountY);
+		}
+		else if (leftClick){
+			betty.drawUniform(program, bettyLeft[playerInd], bcountX, bcountY);
+		}
+		else {
+			betty.drawUniform(program, 0, bcountX, bcountY);
+		}
+
+		if (rightClickH) {
+			helper.drawUniform(program, bettyRight[playerInd], bcountX, bcountY);
+		}
+		else if (leftClickH) {
+			helper.drawUniform(program, bettyLeft[playerInd], bcountX, bcountY);
+		}
+		else {
+			helper.drawUniform(program, hInd, bcountX, bcountY);
+		}
 		follower.Render(untxtprogram);
-		enemy.drawUniform(program, enemyInd, 3, 4);
+		enemy.drawUniform(program, runAnimation[currentIndex], 3, 4);
 		goal.drawUniform(program, 0, 1, 1);
 		renderMap(16, 8);
 	}
@@ -865,7 +900,7 @@ void Render() {
 		int bcountY = 4;
 		betty.drawUniform(program, index, bcountX, bcountY);
 
-		enemy.drawUniform(program, 1, 3, 4);
+		enemy.drawUniform(program, runAnimation[currentIndex], 3, 4);
 		goal.drawUniform(program, 0, 1, 1);
 		renderMap(16, 8);
 	}
@@ -875,7 +910,7 @@ void Render() {
 		int bcountY = 4;
 		betty.drawUniform(program, index, bcountX, bcountY);
 
-		enemy.drawUniform(program, 1, 3, 4);
+		enemy.drawUniform(program, runAnimation[currentIndex], 3, 4);
 		goal.drawUniform(program, 0, 1, 1);
 		renderMap(16, 8);
 	}
@@ -911,6 +946,7 @@ int main(int argc, char *argv[])
 		float elapsed = ticks - lastFrameTicks;
 		lastFrameTicks = ticks;
 		elapsed += accumulator;
+
 		if (elapsed < FIXED_TIMESTEP) {
 			accumulator = elapsed;
 			continue;
@@ -918,6 +954,20 @@ int main(int argc, char *argv[])
 		while (elapsed >= FIXED_TIMESTEP) {
 			Update(FIXED_TIMESTEP);
 			elapsed -= FIXED_TIMESTEP;
+		}
+
+		//animation time update
+		animationElapsed += elapsed;
+		if (animationElapsed > 1.0 / framesPerSecond) {
+			currentIndex++;
+			playerInd++;
+			animationElapsed = 0.0;
+			if (currentIndex > numFrames - 1) {
+				currentIndex = 0;
+			}
+			if (playerInd > playerFrames - 1) {
+				playerInd = 0;
+			}
 		}
 		accumulator = elapsed;
 		ProcessEvents();
