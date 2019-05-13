@@ -205,13 +205,13 @@ public:
 				if (checkEntityCollision(e) && e.entityType == ENTITY_ENEMY) {
 					fail = true;
 				}
-				if (checkEntityCollision(e) && e.entityType == ENTITY_GOAL && STATE_GAME_LEVEL1) {
+				if (checkEntityCollision(e) && e.entityType == ENTITY_GOAL && mode == STATE_GAME_LEVEL1) {
 					win1 = true;
 				}
-				if (checkEntityCollision(e) && e.entityType == ENTITY_GOAL && STATE_GAME_LEVEL2) {
+				if (checkEntityCollision(e) && e.entityType == ENTITY_GOAL && mode == STATE_GAME_LEVEL2) {
 					win2 = true;
 				}
-				if (checkEntityCollision(e) && e.entityType == ENTITY_GOAL && STATE_GAME_LEVEL3) {
+				if (checkEntityCollision(e) && e.entityType == ENTITY_GOAL && mode == STATE_GAME_LEVEL3) {
 					win3 = true;
 				}
 			}
@@ -699,7 +699,7 @@ void Update(float elapsed) {
 
 		if (win1) {
 			cout << "congrats1!" << endl;
-			reset(map);
+			reset(map2);
 			mode = STATE_GAME_LEVEL2;
 		}
 
@@ -759,7 +759,7 @@ void Update(float elapsed) {
 
 		if (win2) {
 			cout << "congrats2!" << endl;
-			//reset(map3);
+			reset(map3);
 			mode = STATE_GAME_LEVEL3;
 		}
 
