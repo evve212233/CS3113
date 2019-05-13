@@ -411,7 +411,7 @@ void RenderMainMenu() {
 	string text2 = "Press: SPACE to jump";
 	string text3 = "LEFT/RIGHT to move";
 	string text4 = "Click anywhere to start the game";
-	DrawText(program, fontTex, text, -1.35f, 0.4f, 0.15f, 0.003f);
+	DrawText(program, fontTex, text, -1.45f, 0.4f, 0.18f, 0.003f);
 	DrawText(program, fontTex, text2, -0.9f, 0.0f, 0.11f, 0.003f);
 	DrawText(program, fontTex, text3, -0.27f, -0.22f, 0.105f, 0.003f);
 	DrawText(program, fontTex, text4, -1.4f, -0.6f, 0.11f, 0.003f);
@@ -550,6 +550,8 @@ void Update(float elapsed) {
 		viewMatrix = glm::translate(viewMatrix, glm::vec3(xMin, yMin, 0.0f));
 		program.SetViewMatrix(viewMatrix);
 		//cout << betty.position.x << " " << betty.position.y << endl;
+		break;
+	case STATE_GAME_OVER:
 		break;
 	default:
 		break;
