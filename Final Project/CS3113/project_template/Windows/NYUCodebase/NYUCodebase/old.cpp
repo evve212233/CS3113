@@ -57,27 +57,13 @@ struct ParticleEmitter {
 
     bool triggered = true;
 
-    ParticleEmitter(unsigned int particleCount, float x, float y, bool sparse, float particleSize = 0.2f, float maxLifeTime = 1.0f) :
+    ParticleEmitter(unsigned int particleCount, float x, float y, float maxLifeTime = 1.0f) :
         position(x, y, 0.0f), gravity(-1.0f), maxLifetime(maxLifeTime), sparse(sparse)
     {
         for (int i = 0; i < particleCount; i++) {
 
             Particle p(position.x, position.y);
-            p.size.x = particleSize;
-            p.size.y = particleSize;
             p.lifetime = ((float)rand() / (float)RAND_MAX) * maxLifetime;
-
-            if (!sparse) {
-                p.velocity.x = 0.0f;
-                p.velocity.y = 0.0f;
-            }
-
-            if (sparse) {
-                p.size.x *= ((float)rand() / (float)RAND_MAX);
-                p.size.y *= ((float)rand() / (float)RAND_MAX);
-                p.velocity.x *= ((float)rand() / (float)RAND_MAX) * ((i % 2 == 0) ? 1 : -1);
-                p.velocity.y *= ((float)rand() / (float)RAND_MAX);
-            }
 
             particles.push_back(p);
         }
@@ -97,40 +83,28 @@ struct ParticleEmitter {
                 particles[i].position.y = position.y;
                 particles[i].velocity.y = 0.2f;
                 particles[i].velocity.x = 0.2f;
-                if (!sparse) {
-                    particles[i].velocity.x = 0.0f;
-                    particles[i].velocity.y = 0.0f;
-                }
-                if (sparse) {
-                    particles[i].velocity.x *= ((float)rand() / (float)RAND_MAX) * ((i % 2 == 0) ? 1 : -1);
-                    particles[i].velocity.y *= ((float)rand() / (float)RAND_MAX);
-                }
 
             }
         }
     }
     void Render(ShaderProgram& program) {
-        if (triggered) {
-            glm::mat4 modelMatrix(1.0f);
-            program.SetModelMatrix(modelMatrix);
-            vector<float> vertices;
-            vector<float> colors;
-            for (int i = 0; i < particles.size(); i++) {
-                vertices.push_back(particles[i].position.x);
-                vertices.push_back(particles[i].position.y);
-            }
-
-            glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices.data());
-            glEnableVertexAttribArray(program.positionAttribute);
-            glDrawArrays(GL_POINTS, 0, particles.size());
+        glm::mat4 modelMatrix(1.0f);
+        program.SetModelMatrix(modelMatrix);
+        vector<float> vertices;
+        for (int i = 0; i < particles.size(); i++) {
+            vertices.push_back(particles[i].position.x);
+            vertices.push_back(particles[i].position.y);
         }
+
+        glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, vertices.data());
+        glEnableVertexAttribArray(program.positionAttribute);
+        glDrawArrays(GL_POINTS, 0, particles.size());
     }
 
     glm::vec3 position;
     glm::vec3 gravity;
     float maxLifetime;
     std::vector<Particle> particles;
-    bool sparse;
 };
 
 //setup variables
