@@ -25,6 +25,8 @@
 #include <vector>
 #include <algorithm>
 #include <SDL_mixer.h>
+#define LEVEL_HEIGHT 10.0f
+#define LEVEL_WIDTH 40.0f
 #define tileSize 0.18f
 #define FIXED_TIMESTEP 0.0166666f
 #define MAX_TIMESTEP 2
@@ -41,7 +43,7 @@ void Cleanup();
 void DrawSpriteSheet(ShaderProgram &program, GLuint texture, int index, int spriteCountX, int spriteCountY);
 void DrawText(ShaderProgram &program, int fontTexture, string text, float row, float col, float size, float spacing);
 float lerp(float v0, float v1, float t);
-void reset(const FlareMap &m);
+void reset(FlareMap &m);
 float friction = 0.8f;
 
 //setup variables
@@ -162,6 +164,8 @@ public:
 	glm::vec2 size; //for 2D
 	glm::vec2 velocity;
 	glm::vec2 acceleration;
+	FlareMap map;
+
 	bool collideL = false, collideR = false, collideU = false, collideD = false;
 	bool canJump = false;
 
@@ -336,17 +340,17 @@ GLuint LoadTexture(const char *filePath) {
 }
 
 /*-----------------Render Map-------------------------------*/
-void renderMap(int sprite_count_x, int sprite_count_y) {
+void renderMap(int sprite_count_x, int sprite_count_y, FlareMap &m) {
 	glm::mat4 modelMapMatrix = glm::mat4(1.0f);
 	program.SetModelMatrix(modelMapMatrix);
 
 	vector<float> vertexData;
 	vector<float> texCoordData;
-	for (int y = 0; y < map.mapHeight; y++) {
-		for (int x = 0; x < map.mapWidth; x++) {
-			if (map.mapData[y][x] != -1) {
-				float u = (float)(((int)map.mapData[y][x]) % sprite_count_x) / (float)sprite_count_x;
-				float v = (float)(((int)map.mapData[y][x]) / sprite_count_x) / (float)sprite_count_y + 0.0022f;
+	for (int y = 0; y < m.mapHeight; y++) {
+		for (int x = 0; x < m.mapWidth; x++) {
+			if (m.mapData[y][x] != -1) {
+				float u = (float)(((int)m.mapData[y][x]) % sprite_count_x) / (float)sprite_count_x;
+				float v = (float)(((int)m.mapData[y][x]) / sprite_count_x) / (float)sprite_count_y + 0.0022f;
 				float spriteWidth = 1.0f / (float)sprite_count_x - 0.0006f;
 				float spriteHeight = 1.0f / (float)sprite_count_y - 0.005f;
 				vertexData.insert(vertexData.end(), {
@@ -463,7 +467,7 @@ Entity enemy;
 Entity goal;
 glm::vec2 starPos;
 
-void placeEntity(string type, float placeX, float placeY) {
+void placeEntity(string type, float placeX, float placeY, FlareMap &m) {
 	float worldX = placeX * tileSize;
 	float worldY = placeY * -tileSize;
 	if (type == "player") {
@@ -472,6 +476,7 @@ void placeEntity(string type, float placeX, float placeY) {
 		startPos.y = worldY + 0.08f;
 		betty = Entity(worldX, worldY, 0.18f, 0.18f, 0.0f, 0.0f, 0.0f, 0.0f);
 		betty.entityType = ENTITY_PLAYER;
+		betty.map = m;
 	}
 	if (type == "player2") {
 		cout << worldX << " " << worldY << endl;
@@ -479,12 +484,14 @@ void placeEntity(string type, float placeX, float placeY) {
 		startPos.y = worldY + 0.08f;
 		helper = Entity(worldX, worldY, 0.18f, 0.18f, 0.0f, 0.0f, 0.0f, 0.0f);
 		helper.entityType = ENTITY_PLAYER;
+		helper.map = m;
 	}
 	if (type == "enemy") {
 		cout << worldX << " " << worldY << endl;
 		enemy = Entity(worldX, worldY, 0.16f, 0.18f, 0.0f, 0.0f, 0.0f, 0.0f);
 		enemy.entityType = ENTITY_ENEMY;
 		entities.push_back(enemy);
+		enemy.map = m;
 	}
 	if (type == "goal") {
 		cout << worldX << " " << worldY << endl;
@@ -493,6 +500,7 @@ void placeEntity(string type, float placeX, float placeY) {
 		starPos.y = worldY + 0.05f;
 		goal.entityType = ENTITY_GOAL;
 		entities.push_back(goal);
+		goal.map = m;
 	}
 }
 
@@ -520,8 +528,8 @@ void RenderGameOver() {
 	if (!fail) {
 		string text = "Congrats!";
 		string text2 = "You are the brighest star!";
-		DrawText(program, fontTex, text, 6.4f, -0.8f, 0.15f, 0.003f);
-		DrawText(program, fontTex, text2, 5.35f, -1.2f, 0.15f, 0.003f);
+		DrawText(program, fontTex, text, -0.4f, 0.2f, 0.15f, 0.003f);
+		DrawText(program, fontTex, text2,-1.5f, -0.2f, 0.15f, 0.003f);
 	}
 	else {
 		string tex = "You are caught!";
@@ -676,8 +684,6 @@ void Update(float elapsed) {
 			helper.canJump = true;
 			helper.velocity.y = 1.5f;
 			helper.acceleration.y = 2.0f;
-			someSound = Mix_LoadWAV("sky.wav");
-			Mix_PlayChannel(-1, someSound, 0);
 		}
 
 
@@ -693,8 +699,6 @@ void Update(float elapsed) {
 			betty.canJump = true;
 			betty.velocity.y = 1.5f;
 			betty.acceleration.y = 2.0f;
-			someSound = Mix_LoadWAV("sky.wav");
-			Mix_PlayChannel(-1, someSound, 0);
 		}
 
 		if (win1) {
@@ -741,6 +745,11 @@ void Update(float elapsed) {
 	case STATE_GAME_LEVEL2:
 		betty.acceleration.x = 0.0f;
 		betty.acceleration.y = 0.0f;
+		betty.canJump = false;
+
+		rightClick = false;
+		leftClick = false;
+
 		if (keys[SDL_SCANCODE_RIGHT] && betty.collideR == false) {
 			betty.acceleration.x = 1.0f;
 			rightClick = true;
@@ -753,8 +762,6 @@ void Update(float elapsed) {
 			betty.canJump = true;
 			betty.velocity.y = 1.5f;
 			betty.acceleration.y = 2.0f;
-			someSound = Mix_LoadWAV("sky.wav");
-			Mix_PlayChannel(-1, someSound, 0);
 		}
 
 		if (win2) {
@@ -765,8 +772,7 @@ void Update(float elapsed) {
 
 		else if (fail) {
 			cout << "It's ok, please try again!";
-			fail = true;
-			mode = STATE_GAME_OVER;
+			reset(map2);
 		}
 		else {
 			betty.update(elapsed);
@@ -776,6 +782,7 @@ void Update(float elapsed) {
 			follower.Update(elapsed);
 		}
 		enemy.update(elapsed);
+
 		viewMatrix = glm::mat4(1.0f);
 		if (betty.position.x < goal.position.x) {
 			xMin = min(-betty.position.x, -1.88f);
@@ -788,14 +795,17 @@ void Update(float elapsed) {
 		viewMatrix = glm::translate(viewMatrix, glm::vec3(xMin, yMin, 0.0f));
 		program.SetViewMatrix(viewMatrix);
 		untxtprogram.SetViewMatrix(viewMatrix);
+		//cout << betty.position.x << " " << betty.position.y << endl;
 		break;
 
 	case STATE_GAME_LEVEL3:
-		cout << "congrats3!" << endl;
-
 		betty.acceleration.x = 0.0f;
 		betty.acceleration.y = 0.0f;
 		betty.canJump = false;
+
+		rightClick = false;
+		leftClick = false;
+
 		if (keys[SDL_SCANCODE_RIGHT] && betty.collideR == false) {
 			betty.acceleration.x = 1.0f;
 			rightClick = true;
@@ -808,19 +818,17 @@ void Update(float elapsed) {
 			betty.canJump = true;
 			betty.velocity.y = 1.5f;
 			betty.acceleration.y = 2.0f;
-			someSound = Mix_LoadWAV("sky.wav");
-			Mix_PlayChannel(-1, someSound, 0);
 		}
+
 		if (win3) {
 			cout << "congrats3!" << endl;
-			//goal.size += 1;
-			mode = STATE_GAME_LEVEL3;
+			reset(map3);
+			mode = STATE_GAME_OVER;
 		}
 
 		else if (fail) {
 			cout << "It's ok, please try again!";
-			fail = true;
-			mode = STATE_GAME_OVER;
+			reset(map3);
 		}
 		else {
 			betty.update(elapsed);
@@ -829,30 +837,32 @@ void Update(float elapsed) {
 			follower.position.y = betty.position.y;
 			follower.Update(elapsed);
 		}
+		enemy.update(elapsed);
 
 		viewMatrix = glm::mat4(1.0f);
 		if (betty.position.x < goal.position.x) {
-xMin = min(-betty.position.x, -1.88f);
-yMin = min(-betty.position.y, 1.0f);
+			xMin = min(-betty.position.x, -1.88f);
+			yMin = min(-betty.position.y, 1.0f);
 		}
 		else {
-		xMin = min(-betty.position.x, -goal.position.x);
-		yMin = min(-betty.position.y, 1.0f);
+			xMin = min(-betty.position.x, -goal.position.x);
+			yMin = min(-betty.position.y, 1.0f);
 		}
 		viewMatrix = glm::translate(viewMatrix, glm::vec3(xMin, yMin, 0.0f));
 		program.SetViewMatrix(viewMatrix);
 		untxtprogram.SetViewMatrix(viewMatrix);
+		//cout << betty.position.x << " " << betty.position.y << endl;
 		break;
 	default:
 		break;
 	}
 }
 
-void reset(const FlareMap &m) {
+void reset(FlareMap &m) {
 	entities.clear();
 	fail = false;
 	for (FlareMapEntity entity : m.entities) {
-		placeEntity(entity.type, entity.x, entity.y);
+		placeEntity(entity.type, entity.x, entity.y, m);
 	}
 }
 
@@ -869,6 +879,7 @@ void Render() {
 		RenderMainMenu();
 	}
 	else if (mode == STATE_GAME_LEVEL1) {
+		glClearColor(0.6f, 0.8f, 1.0f, 0.0f);
 		int bcountX = 4;
 		int bcountY = 4;
 		if (rightClick) {
@@ -893,37 +904,55 @@ void Render() {
 		follower.Render(untxtprogram);
 		enemy.drawUniform(program, runAnimation[currentIndex], 3, 4);
 		goal.drawUniform(program, 0, 1, 1);
-		renderMap(16, 8);
+		renderMap(16, 8, map);
 	}
 	else if (mode == STATE_GAME_LEVEL2) {
+		glClearColor(1.0f, 0.6f, 0.0f, 0.0f);
 		int index = 0;
 		int bcountX = 4;
 		int bcountY = 4;
-		betty.drawUniform(program, index, bcountX, bcountY);
-
+		if (rightClick) {
+			betty.drawUniform(program, bettyRight[playerInd], bcountX, bcountY);
+		}
+		else if (leftClick) {
+			betty.drawUniform(program, bettyLeft[playerInd], bcountX, bcountY);
+		}
+		else {
+			betty.drawUniform(program, 0, bcountX, bcountY);
+		}
 		enemy.drawUniform(program, runAnimation[currentIndex], 3, 4);
 		goal.drawUniform(program, 0, 1, 1);
 		follower.Render(untxtprogram);
-		renderMap(16, 8);
+		renderMap(16, 8, map2);
 	}
 	else if (mode == STATE_GAME_LEVEL3) {
+		glClearColor(0.0f, 0.1f, 0.0f, 0.0f);
 		int index = 0;
 		int bcountX = 4;
 		int bcountY = 4;
-		betty.drawUniform(program, index, bcountX, bcountY);
-
+		if (rightClick) {
+			betty.drawUniform(program, bettyRight[playerInd], bcountX, bcountY);
+		}
+		else if (leftClick) {
+			betty.drawUniform(program, bettyLeft[playerInd], bcountX, bcountY);
+		}
+		else {
+			betty.drawUniform(program, 0, bcountX, bcountY);
+		}
 		enemy.drawUniform(program, runAnimation[currentIndex], 3, 4);
 		goal.drawUniform(program, 0, 1, 1);
 		follower.Render(untxtprogram);
-		renderMap(16, 8);
+		renderMap(16, 8, map3);
 	}
 	else if (mode == STATE_GAME_OVER) {
 		if (fail) {
 			RenderGameOver();
 		}
 		else {
-			goal.position.x = starPos.x;
-			goal.position.y = starPos.y;
+			glm::mat4 viewMatrix = glm::mat4(1.0f);
+			program.SetViewMatrix(viewMatrix);
+			goal.position.x = 0.0f;
+			goal.position.y = 0.0f;
 			goal.size += 0.5f;
 			goal.drawUniform(program, 0, 1, 1);
 			RenderGameOver();
