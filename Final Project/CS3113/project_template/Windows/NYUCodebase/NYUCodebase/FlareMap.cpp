@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <cassert>
-
+#include <exception>
 FlareMap::FlareMap() {
 	mapData = nullptr;
 	mapWidth = -1;
@@ -13,7 +13,7 @@ FlareMap::FlareMap() {
 }
 
 FlareMap::~FlareMap() {
-	for(int i=0; i < mapHeight; i++) {
+	for (int i = 0; i < mapHeight-1; i++) {
 		delete mapData[i];
 	}
 	delete mapData;

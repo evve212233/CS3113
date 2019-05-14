@@ -784,14 +784,8 @@ void Update(float elapsed) {
 		enemy.update(elapsed);
 
 		viewMatrix = glm::mat4(1.0f);
-		if (betty.position.x < goal.position.x) {
-			xMin = min(-betty.position.x, -1.88f);
-			yMin = min(-betty.position.y, 1.0f);
-		}
-		else {
-			xMin = min(-betty.position.x, -goal.position.x);
-			yMin = min(-betty.position.y, 1.0f);
-		}
+		xMin = min(-betty.position.x, -1.88f);
+		yMin = min(-betty.position.y, 1.0f);
 		viewMatrix = glm::translate(viewMatrix, glm::vec3(xMin, yMin, 0.0f));
 		program.SetViewMatrix(viewMatrix);
 		untxtprogram.SetViewMatrix(viewMatrix);
